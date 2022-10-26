@@ -20,7 +20,7 @@ class Client:
 
     def get(self: "Client", url: str) -> Dict[str, Any]:
         try:
-            requests.get(url).json()
+            self.session.get(url).json()
         except Exception as e:
             return APIException(e)
 
@@ -28,7 +28,9 @@ class Client:
 class VelibClient(Client):
     base_url = "https://velib-metropole-opendata.smoove.pro/opendata/Velib_Metropole"
 
-    def __init__(self: "VelibClient"):
+    def __init__(
+        self: "VelibClient",
+    ) -> None:
         self._stations = Cache(timedelta(minutes=30), self._station_getter)
         self._station_statuses = Cache(
             timedelta(seconds=5), self._station_status_getter)
@@ -42,13 +44,13 @@ class VelibClient(Client):
     def list_stations(self: "VelibClient") -> List[Dict[str, Any]]:
         return self._stations["stations"]
 
-    def get_station(self: "VelibClient", id=None, name=None):
+    def get_station(self: "VelibClient", id=None, name=None) -> Dict[str, Any]:
         try:
             return next(s for s in self._stations["stations"] if s["station_id"] == id or s["name"] == name)
         except StopIteration:
             raise StationNotFound
 
-    def get_station_status(self: "VelibClient", id: int):
+    def get_station_status(self: "VelibClient", id: int) -> Dict[str, Any]:
         try:
             return next(s for s in self._station_statuses["stations"] if s["station_id"] == id)
         except StopIteration:
